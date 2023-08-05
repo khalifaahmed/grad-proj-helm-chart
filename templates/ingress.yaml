@@ -1,0 +1,43 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grad-proj-app                  
+  #namespace: issuetracker-ns
+  annotations:
+  #   nginx.ingress.kubernetes.io/use-regex: 'true'
+  #   kubernetes.io/ingress.class: nginx
+  #   cert-manager.io/cluster-issuer: "letsencrypt"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls: 
+  - hosts: 
+    - grad-proj.com
+    secretName: mytls
+  rules:
+    #- host: a03345d0a6a8544668c54619fd630dfb-538195044.us-east-2.elb.amazonaws.com     # just for testing
+    - host: grad-proj.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: angular-service
+                port:
+                  number: 80         
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 5255     
+          - path: /network
+            pathType: Prefix
+            backend:
+              service:
+                name: network
+                port:
+                  number: 8080     
+

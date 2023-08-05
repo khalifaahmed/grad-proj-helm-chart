@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: {{ .Values.containers.api_image }}
+          resources:
+            limits:
+              memory: '128Mi'
+              cpu: '500m'
+          ports:
+            - containerPort: {{ .Values.containers.api_port }}
+          env:
+            - name: EmailOptions__HostAddress
+              valueFrom:
+                configMapKeyRef:
+                  name: grad-proj-configmap
+                  key: EmailOptions__HostAddress
+            - name: EmailOptions__HostPort
+              valueFrom:
+                configMapKeyRef:
+                  name: grad-proj-configmap
+                  key: EmailOptions__HostPort
+            - name: EmailOptions__HostUsername
+              valueFrom:
+                configMapKeyRef:
+                  name: grad-proj-configmap
+                  key: EmailOptions__HostUsername
+            - name: EmailOptions__HostPassword
+              valueFrom:
+                configMapKeyRef:
+                  name: grad-proj-configmap
+                  key: EmailOptions__HostPassword
+            - name: EmailOptions__SenderEmail
+              valueFrom:
+                configMapKeyRef:
+                  name: grad-proj-configmap
+                  key: EmailOptions__SenderEmail
+            - name: EmailOptions__SenderName
+              valueFrom:
+                configMapKeyRef:
+                  name: grad-proj-configmap
+                  key: EmailOptions__SenderName
+            - name: Postgres__Host
+              valueFrom:
+                configMapKeyRef:
+                  name: grad-proj-configmap
+                  key: Postgres__Host
+            - name: Postgres__Database
+              valueFrom:
+                configMapKeyRef:
+                  name: grad-proj-configmap
+                  key: Postgres__Database
+            - name: Postgres__Username
+              valueFrom:
+                secretKeyRef:
+                  name: grad-proj-secret
+                  key: Postgres__Username
+            - name: Postgres__Password
+              valueFrom:
+                secretKeyRef:
+                  name: grad-proj-secret
+                  key: Postgres__Password
+            - name: AWS__AccessKeyId
+              valueFrom:
+                secretKeyRef:
+                  name: grad-proj-secret
+                  key: AWS__AccessKeyId
+            - name: AWS__SecretAccessKey
+              valueFrom:
+                secretKeyRef:
+                  name: grad-proj-secret
+                  key: AWS__SecretAccessKey
+            - name: AWS__Region
+              valueFrom:
+                configMapKeyRef:
+                  name: grad-proj-configmap
+                  key: AWS__Region
+            - name: AWS__BucketName
+              valueFrom:
+                configMapKeyRef:
+                  name: grad-proj-configmap
+                  key: AWS__BucketName
+            - name: UI__Url
+              value: https://grad-proj.com 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+spec:
+  selector:
+    app: api
+  ports:
+    - port: {{ .Values.services.api_svc.port }}
+      targetPort: {{ .Values.containers.api_port }}
+
